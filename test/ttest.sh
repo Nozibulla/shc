@@ -14,12 +14,9 @@ txtrst='\e[0m'    # Text Reset
 stat=0
 pc=0
 fc=0
-if ! /bin/bash "$(dirname "$0")/filenames.sh" "$shc"; then
-    exit 1
-fi
-if ! /bin/bash "$(dirname "$0")/errors.sh" "$shc"; then
-    exit 1
-fi
+for regression in filenames errors bash-static; do
+    /bin/bash "$(dirname "$0")/$regression.sh" "$shc" || exit 1
+done
 echo
 echo "== Running tests ..."
 for shell in ${shells[@]}; do
