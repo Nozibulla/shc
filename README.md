@@ -45,6 +45,31 @@ source as `build/tool.c`. The output directory must already exist. Without `-o`,
 the names remain `script.sh.x` and `script.sh.x.c`. Earlier versions always saved
 the C source beside the input script, even when `-o` selected another location.
 
+### Script interpreters
+
+Use a shebang that names the interpreter directly, such as `#!/bin/bash` or
+`#!/bin/sh`. To find Bash on your system, run `command -v bash` and use the
+absolute path it prints after `#!` on the first line of the script. For example,
+if it prints `/bin/bash`:
+
+```bash
+#!/bin/bash
+printf 'Hello, world!\n'
+```
+
+`#!/usr/bin/env bash` is not supported by automatic interpreter detection: shc
+recognizes `env` as the interpreter and reports `Unknown shell (env)` rather
+than looking up Bash through `PATH`. The compiled program still needs the
+interpreter at the path specified in the shebang when it runs.
+
+Built-in defaults are available for the interpreter names `sh`, `dash`, `bash`,
+`zsh`, `bsh`, `Rsh`, `ksh`, `tsh`, `ash`, `csh`, `tcsh`, `rc`, and `perl`.
+The name `bash-static` uses the same defaults as `bash`.
+These names are matched against the last component of the interpreter path;
+they are not a guarantee that every script or option works with every shell.
+Other interpreter names require suitable `-i`, `-x`, and `-l` options. The
+experimental `-H` mode has additional restrictions described below.
+
 ## Redistributing binaries with -r
 
 By default, shc binds the compiled script to metadata of the shell executable
