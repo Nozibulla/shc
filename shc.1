@@ -15,8 +15,8 @@ The binary version will get a \f[CR].x\f[R] extension appended by
 default if \f[I]outfile\f[R] is not defined with [\-o \f[I]outfile\f[R]]
 option and will usually be a bit larger in size than the original ascii
 code.
-Generated C source code is saved in a file with the extension
-\f[CR].x.c\f[R] or in a file specified with appropriate option.
+Generated C source code is saved as \f[CR]script.x.c\f[R] by default, or
+as \f[CR]outfile.c\f[R] when \f[CR]\-o outfile\f[R] is specified.
 .PP
 If you supply an expiration date with the \f[CR]\-e\f[R] option, the
 compiled binary will refuse to run after the date specified.
@@ -68,7 +68,9 @@ eXec command, as a printf format i.e:
 Last shell option i.e: \f[CR]\-\-\f[R]
 .TP
 \-o \f[I]outfile\f[R]
-output to the file specified by outfile
+Save the executable as \f[I]outfile\f[R] and the generated C source as
+\f[I]outfile\f[R] with \f[CR].c\f[R] appended.
+The output directory must already exist.
 .TP
 \-r
 Relax security by disabling binding to the shell executable\(cqs file

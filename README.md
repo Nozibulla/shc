@@ -40,6 +40,11 @@ shc -U -f script.sh -o binary # Untraceable binary (prevent strace, ptrace etc..
 shc -H -f script.sh -o binary # Untraceable binary, does not require root (only bourne shell (sh) scripts with no parameter)
 ```
 
+With `-o build/tool`, the executable is saved as `build/tool` and the generated C
+source as `build/tool.c`. The output directory must already exist. Without `-o`,
+the names remain `script.sh.x` and `script.sh.x.c`. Earlier versions always saved
+the C source beside the input script, even when `-o` selected another location.
+
 ## Redistributing binaries with -r
 
 By default, shc binds the compiled script to metadata of the shell executable

@@ -119,6 +119,7 @@ contains 'warning: could not strip output: valid.x'
 [ "$(./valid.x)" = ok ] || fail 'strip warning broke executable'
 pass 'strip failure remains a warning'
 
+mkdir missing
 run 0 env CC=true STRIP=true "$shc" -f valid -o missing/output
 # The filename fix uses native chmod; both paths must identify the output.
 contains 'missing/output'

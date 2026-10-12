@@ -7,5 +7,6 @@ check: shc
 	/bin/bash "$(srcdir)/../test/filenames.sh" ./shc
 	/bin/bash "$(srcdir)/../test/errors.sh" ./shc
 	/bin/bash "$(srcdir)/../test/bash-static.sh" ./shc
+	/bin/bash "$(srcdir)/../test/output-paths.sh" ./shc
 	$(srcdir)/../test/ttest.sh ./shc
 

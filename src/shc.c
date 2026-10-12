@@ -78,7 +78,7 @@ static const char * help[] = {
 "    -i %s  Inline option for the shell interpreter i.e: -e",
 "    -x %s  eXec command, as a printf format i.e: exec('%s',@ARGV);",
 "    -l %s  Last shell option i.e: --",
-"    -o %s  output filename",
+"    -o %s  output filename (C source is saved as filename.c)",
 "    -r     Relax security. Make a redistributable binary",
 "    -v     Verbose compilation",
 "    -S     Switch ON setuid for root callable programs [OFF]",
@@ -122,6 +122,7 @@ static const char * help[] = {
 
 static char * file;
 static char * file2;
+static char * cfile;
 static char   date[21];
 static char * mail = "Please contact your provider jahidulhamid@yahoo.com";
 static char   rlax[1];
@@ -1237,7 +1238,28 @@ void dump_array(FILE * o, void * ptr, char * name, int l, char * cast)
 	prnt_array(o, ptr, name, l, cast);
 }
 
-int write_C(char * file, char * argv[])
+static int set_output_names(void)
+{
+	if (!file2) {
+		file2 = malloc(strlen(file) + 3);
+		if (!file2) {
+			report_errno("allocating output filename", file);
+			return -1;
+		}
+		strcpy(file2, file);
+		strcat(file2, ".x");
+	}
+	cfile = malloc(strlen(file2) + 3);
+	if (!cfile) {
+		report_errno("allocating C source filename", file2);
+		return -1;
+	}
+	strcpy(cfile, file2);
+	strcat(cfile, ".c");
+	return 0;
+}
+
+int write_C(char * name, char * argv[])
 {
 	char pswd[256];
 	int pswd_z = sizeof(pswd);
@@ -1262,7 +1284,7 @@ int write_C(char * file, char * argv[])
 	int tst2_z = strlen(tst2) + 1;
 	char* chk2 = strdup(tst2);
 	int chk2_z = tst2_z;
-	char* name = strdup(file);
+	struct stat input_stat, output_stat;
 	FILE * o;
 	int indx;
 	int numd = 0;
@@ -1298,7 +1320,12 @@ int write_C(char * file, char * argv[])
 	arc4(chk2, chk2_z); numd++;
 
 	/* Output */
-	name = strcat(realloc(name, strlen(name)+5), ".x.c");
+	if (!stat(file, &input_stat) && !stat(name, &output_stat) &&
+		input_stat.st_dev == output_stat.st_dev &&
+		input_stat.st_ino == output_stat.st_ino) {
+		fprintf(stderr, "%s: refusing to overwrite source script: %s\n", my_name, name);
+		exit(1);
+	}
 	o = fopen(name, "w");
 	if (!o) {
 		report_errno("creating output file", name);
@@ -1461,22 +1488,13 @@ int make(void)
 	if (!ldflags)
 		ldflags = "";
 
-	if (!file2) {
-		file2 = malloc(strlen(file) + 3);
-		if (!file2) {
-			report_errno("allocating output filename", file);
-			return -1;
-		}
-		strcpy(file2, file);
-		strcat(file2, ".x");
-	}
-	source = quote_file(file);
+	source = quote_file(cfile);
 	output = quote_file(file2);
 	if (!source || !output) {
 		report_errno("quoting filenames", file);
 		goto out;
 	}
-	if (run_command("%s %s %s %s.x.c -o %s", cc, cflags, ldflags, source, output))
+	if (run_command("%s %s %s %s -o %s", cc, cflags, ldflags, source, output))
 		goto out;
 	strip = getenv("STRIP");
 	if (!strip)
@@ -1503,7 +1521,9 @@ int do_all(int argc, char * argv[])
 		return 1;
 	if (eval_shell(text))
 		return 1;
-	if (write_C(file, argv))
+	if (set_output_names())
+		return 1;
+	if (write_C(cfile, argv))
 		return 1;
 	if (make())
 		return 1;
